@@ -1,6 +1,7 @@
 require 'active_support/core_ext/hash/conversions'
 require 'ruby-prof'
 require 'nokogiri'
+require 'memory_profiler'
 require 'json'
 
 json = File.read('fixtures/offers.json')
@@ -39,10 +40,11 @@ end
 
 puts '------------------------------------------------------------'
 puts '[JSON]'
-profile(RubyProf::MEMORY) do
-  offers = JSON.parse(json)["payload"]["offers"]
-  transform(offers)
-end
+MemoryProfiler.start
+offers = JSON.parse(json)["payload"]["offers"]
+transform(offers)
+report = MemoryProfiler.stop
+report.pretty_print
 
 puts '------------------------------------------------------------'
 puts '[XML]'
@@ -53,8 +55,8 @@ end
 
 puts '------------------------------------------------------------'
 puts '[XML]'
-profile(RubyProf::MEMORY) do
-  offers = Hash.from_xml(xml)["root"]["payload"]["offers"]
-  transform(offers)
-end
-
+MemoryProfiler.start
+offers = Hash.from_xml(xml)["root"]["payload"]["offers"]
+transform(offers)
+report = MemoryProfiler.stop
+report.pretty_print
