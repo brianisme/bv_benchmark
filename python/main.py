@@ -1,8 +1,12 @@
 import json
 import time
 
-import xmltodict
+from lxml import etree
 from memory_profiler import profile
+
+def recursive_dict(element):
+   return element.tag, \
+          dict(map(recursive_dict, element)) or element.text
 
 def load_json(file):
   return json.load(file)
@@ -14,7 +18,17 @@ def transform(offers):
     'price': o['shortTermPrice']['amount'] if o.get('shortTermPrice') else o['longTermPrice']['amount'],
     'promotion': o.get('promotions'),
     'highlight': o['highlights'],
-    'provider': o['provider'].get('name')
+    'provider': o['provider'].get('value')
+  }, offers)
+
+def transform_xml(offers):
+  return map(lambda o: {
+    'id': o.xpath('id')[0].text,
+    'name': o.xpath('name')[0].text,
+    'price': o.xpath('shortTermPrice/amount')[0].text if len(o.xpath('shortTermPrice')) else o.xpath('longTermPrice/amount')[0].text,
+    'promotion': recursive_dict(o.xpath('promotions')[0]) if len(o.xpath('promotions')) else None,
+    'highlight': recursive_dict(o.xpath('highlights')[0]),
+    'provider': o.xpath('provider/value')[0].text
   }, offers)
 
 @profile
@@ -23,9 +37,10 @@ def parse_json(file):
   return transform(offers)
 
 @profile
-def parse_xml(file):
-  offers = xmltodict.parse(file)['root']['payload']['offers']
-  return transform(offers)
+def parse_xml(str):
+  root = etree.XML(str)
+  offers = root.xpath('payload/offers')
+  return transform_xml(offers)
 
 
 def json_profile():
@@ -39,7 +54,7 @@ def xml_profile():
   with open('fixtures/offers.xml') as xml_file:
     start_time = time.time()
 
-    transformedOffers = parse_xml(xml_file)
+    transformedOffers = parse_xml(xml_file.read())
     print(transformedOffers[0])
     print("--- %s seconds ---" % (time.time() - start_time))
 
