@@ -1,0 +1,14 @@
+{
+  "name": "moverapp",
+  "version": "0.0.0",
+  "scripts": {
+    "profile": "?"
+  },
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "dependencies": {
+    "@airbnb/node-memwatch": "*",
+    "xml2js": "*"
+  }
+}
