@@ -49,54 +49,29 @@ end
 
 puts '------------------------------------------------------------'
 puts '[JSON]'
-profile do
-  offers = JSON.parse(json)['payload']['offers']
-  transform(offers)
-end
-
-puts '------------------------------------------------------------'
-puts '[JSON]'
 MemoryProfiler.start
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 offers = JSON.parse(json)['payload']['offers']
 transform(offers)
+puts "Time used: #{Process.clock_gettime(Process::CLOCK_MONOTONIC) - start}"
 report = MemoryProfiler.stop
 report.pretty_print
 
 puts '------------------------------------------------------------'
 puts '[Oj]'
-profile do
-  offers = Oj.load(json)
-  transform(offers['payload']['offers'])
-end
-
-puts '------------------------------------------------------------'
-puts '[Oj]'
 MemoryProfiler.start
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 offers = Oj.load(json)
 transform(offers['payload']['offers'])
+puts "Time used: #{Process.clock_gettime(Process::CLOCK_MONOTONIC) - start}"
 report = MemoryProfiler.stop
 report.pretty_print
 
-puts '------------------------------------------------------------'
-puts '[Nokogiri]'
-profile do
-  offers = Nokogiri::XML.parse(File.open('fixtures/offers.xml'))
-  ok =
-    offers.xpath('//offers').map do |offer|
-      {
-        id: offer.at_xpath('id').text,
-        name: offer.at_xpath('name').text,
-        price:
-          offer.at_css('shortTermPrice amount')&.text ||
-            offer.at_css('longTermPrice amount')&.text
-      }
-    end
-  ok
-end
 
 puts '------------------------------------------------------------'
 puts '[Nokogiri]'
 MemoryProfiler.start
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 offers = Nokogiri::XML.parse(File.open('fixtures/offers.xml'))
 ok =
   offers.xpath('//offers').map do |offer|
@@ -109,20 +84,17 @@ ok =
     }
   end
 ok
+puts "Time used: #{Process.clock_gettime(Process::CLOCK_MONOTONIC) - start}"
 report = MemoryProfiler.stop
 report.pretty_print
 
-puts '------------------------------------------------------------'
-puts '[ox]'
-profile do
-  doc = Ox.load(xml, mode: :hash)
-  transform_symbol(doc[:root][:payload][:offers])
-end
 
 puts '------------------------------------------------------------'
 puts '[ox]'
 MemoryProfiler.start
+start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 doc = Ox.load(xml, mode: :hash)
 transform_symbol(doc[:root][:payload][:offers])
+puts "Time used: #{Process.clock_gettime(Process::CLOCK_MONOTONIC) - start}"
 report = MemoryProfiler.stop
 report.pretty_print
