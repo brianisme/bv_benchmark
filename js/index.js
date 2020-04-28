@@ -7,9 +7,9 @@ const xml = fs.readFileSync('fixtures/offers.xml', 'utf8');
 
 function profile(fn) {
   const t0 = performance.now()
-  const heap0 = process.memoryUsage().heapTotal
+  const heap0 = process.memoryUsage().heapUsed
   fn()
-  const heap1 = process.memoryUsage().heapTotal
+  const heap1 = process.memoryUsage().heapUsed
   const t1 = performance.now()
   console.log('Time used:', t1 - t0);
   console.log('Memory used:', (((heap1 - heap0)  / 1024) / 1024));
