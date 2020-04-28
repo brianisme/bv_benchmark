@@ -1,6 +1,5 @@
-const memwatch = require('@airbnb/node-memwatch');
 const fs = require('fs');
-const { parseString } = require('xml2js');
+const x2j = require('rapidx2j');
 const { performance } = require('perf_hooks');
 
 const json = fs.readFileSync('fixtures/offers.json');
@@ -29,15 +28,12 @@ function transform(offers) {
   })
 }
 
-
 console.log('----------------------------------')
 console.log('[XML]')
 
 profile(function() {
-  parseString(xml, function(_err, { root: { payload }}){
-    transform(payload[0].offers)
-    console.log('transformed')
-  })
+  const offers = x2j.parse(xml, { preserve_case: true })['payload']['offers']
+  transform(offers)
 })
 
 
